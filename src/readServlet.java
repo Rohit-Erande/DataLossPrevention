@@ -68,7 +68,7 @@ public class readServlet extends HttpServlet {
 	}
 private static void insertdb(String value,int cnt) throws IOException{
 		
-		URL url=new URL("http://127.0.0.1:5984/emailtestrepo/"+java.util.UUID.randomUUID());
+		URL url=new URL("http://127.0.0.1:5984/emailrepo/"+java.util.UUID.randomUUID());
 	HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 	httpCon.setDoOutput(true);
 	httpCon.setRequestMethod("PUT");
