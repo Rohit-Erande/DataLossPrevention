@@ -52,6 +52,7 @@ public class DataLoader extends HttpServlet {
 					       }
 		               }
 				 request.setAttribute("message", "File Uploaded Successfully");
+				 response.sendRedirect("./readServlet");
 			}
 			catch(Exception ex){
 				request.setAttribute("message", "File Upload Failed due to " + ex);
