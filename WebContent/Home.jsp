@@ -16,7 +16,7 @@ Please select the email pcaps to upload
 	<input type="submit" value="upload email file" onclick="./DataLoader"/>
 </form>
 
-<form action="wordCount.html" >
+<form action="WordCount.html" >
 	<input type="submit" value="Click to view Chart" />
 </form>
 
