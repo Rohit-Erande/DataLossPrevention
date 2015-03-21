@@ -10,10 +10,14 @@
 <h3>File Upload</h3>
 Please select the email pcaps to upload
 
-<form action="./DataLoader" method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data">
 	<input type="file" name="file"/>
 	</br>
-	<input type="submit" value="upload email file"/>
+	<input type="submit" value="upload email file" onclick="./DataLoader"/>
+</form>
+
+<form action="wordCount.html" >
+	<input type="submit" value="Click to view Chart" />
 </form>
 
 </body>
