@@ -35,7 +35,7 @@ public class readServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		System.out.println("inside doGet of readServlet");
 		int cnt=100;
-		String[] timeStamp={"2015-02-08 14:59:30.252","2014-10-07 18:59:30.252","2014-12-12 15:59:30.252","2010-03-08 14:59:30.252"};
+		String[] timeStamp={"2015-02-08 14:59:30","2014-10-07 18:59:30","2014-12-12 15:59:30","2010-03-08 14:59:30"};
 		int r=0;
 		String value="";
 		String line="";
@@ -48,7 +48,7 @@ public class readServlet extends HttpServlet {
 			r = (int) (Math.random() * (2 - 0)) + 0;
 			try{
 			//System.out.println("Subject "+data[0]+" From Name: "+data[1]+" From Address: "+data[2]+" To Name: "+data[4]+" To Address: "+data[5]);
-			value="{\"sub\": [{\"subject\": "+"\""+data[0]+"\""+"}],\"addresses\": [{\"from_name\": "+"\""+data[1]+"\""+",\"from_address\": "+"\""+data[2]+"\""+"},{\"to_name\": "+"\""+data[4]+"\""+",\"to_address\": "+"\""+data[5]+"\""+"}],\"time\": "+"\""+timeStamp[r]+"\""+"}";
+			value="{\"sub\": "+"\""+data[0]+"\""+",\"addresses\": [{\"from_name\": "+"\""+data[1]+"\""+",\"from_address\": "+"\""+data[2]+"\""+"},{\"to_name\": "+"\""+data[4]+"\""+",\"to_address\": "+"\""+data[5]+"\""+"}],\"time\": "+"\""+timeStamp[r]+"\""+"}";
 			//System.out.println(value);
 			System.out.println("--------------------");
 			insertdb(value,cnt);
