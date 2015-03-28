@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+
+
+.line {
+  fill: none;
+  stroke: #4682b4;
+  stroke-width: 1.5px;
+}
+
+
+</style>
+<body>
+<p> Enter one word to display line chart </p>
+
+<form id="selectWord">
+
+	<input id="word" name="word" type="text"/>
+	
+	
+	<input type="button" value="submit" onclick="connect()"/>
+</form>
+<form action="Home.jsp" >
+<button onclick="">Back to home page</button>
+</form>	
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+<script>
+function connect()
+{ 
+word=document.getElementById("word").value;
+
+$.ajax({
+    //url : 'http://localhost:5984/emailrepo/_design/repository/_view/byWCTime?group_level=2',
+    //url : 'http://localhost:5984/emailrepo/_design/repository/_view/byWCTime?group_level=2&startkey=[\"'+word+'\"]',
+	url : 'http://localhost:5984/emailrepo/_design/repository/_view/byWCTime?group_level=2&startkey=[\"'+word+'\"]&endkey=[\"'+word+'\",{}]',
+	type : 'GET',
+    dataType : "jsonp",
+    success : function(json) {
+	console.log("success");
+	
+	sdata=JSON.stringify(json);
+       //alert(data);
+	//	console.log(data);
+		draw_lineChart(sdata);
+	
+	//draw_histogram(json);
+	}
+  });
+}
+function draw_lineChart(sdata){
+data = $.parseJSON(sdata);
+console.log(data);
+
+var WIDTH = 960, HEIGHT = 500;
+
+
+var parseTime = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+
+
+
+var margin = {
+    top: 20,
+    right: 20,
+    bottom: 30,
+    left: 50
+}, width = WIDTH - margin.left - margin.right, height = HEIGHT - margin.top - margin.bottom;
+
+var x = d3.time.scale().range([ 0, width ]);
+
+var y = d3.scale.linear().range([ height, 0 ]);
+
+var xAxis = d3.svg.axis().scale(x).orient("bottom");
+
+var yAxis = d3.svg.axis().scale(y).orient("left");
+
+var line = d3.svg.line()
+.x(function(d) {
+    return x(d.key);
+})
+.y(function(d) {
+    return y(d.value);
+});
+
+
+var svg = d3.select("body").append("svg")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+ 
+    data.rows.forEach(function(d) {
+        d.key = parseTime(d.key[1]);
+        d.value = +d.value;
+    });
+    x.domain(d3.extent(data.rows, function(d) {
+		//console.log(d.key[1]);
+	   return d.key;
+    }));
+    y.domain(d3.extent(data.rows, function(d) {
+        return d.value;
+    }));
+    svg.append("g")
+	.attr("class", "x axis")
+	.attr("transform", "translate(0," + height + ")")
+	.call(xAxis);
+    svg.append("g")
+	.attr("class", "y axis")
+	.call(yAxis)
+	.append("text")
+	.attr("transform", "rotate(-90)")
+	.attr("y", 6)
+	.attr("dy", ".71em")
+	.style("text-anchor", "end")
+	.text("Count");
+   
+   svg.append("path").datum(data.rows).attr("class", "line").attr("d", line);
+}
+
+</script>
