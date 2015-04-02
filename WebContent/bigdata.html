@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>Bootstrap_And_jQuery_Website</title>
+
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/main.css" rel="stylesheet">
+  <link href="css/responsive.css" rel="stylesheet">
+  <style> /* set the CSS */
+
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+	.line {
+	  fill: none;
+	  stroke: #4682b4;
+	  stroke-width: 1.5px;
+	}
+
+	</style>
+  <script src="js/jquery.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.isotope.min.js"></script>
+  <script src="js/main.js"></script>
+</head>
+
+<body class="homepage">
+
+<header id="header">
+
+  <nav class="navbar navbar-inverse" role="banner">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo"></a>
+
+      </div>
+
+      <div class="collapse navbar-collapse navbar-right">
+        <ul class="nav navbar-nav">
+                        <li ><a href="index.html">Home</a></li>
+                        <li class="dropdown active">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Products <i class="fa fa-angle-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="mobile.html">Mobile</a></li>
+                                <li class="active"><a href="bigdata.html">Big Data</a></li>
+                               
+                            </ul>
+                        </li>
+						<li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">About Us <i class="fa fa-angle-down"></i></a>
+                            <ul class="dropdown-menu">
+                               
+                                <li><a href="locations.html">Location</a></li>
+								<li><a href="pageunderconstruction.html">Contacts</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+      </div>
+    </div><!--/.container-->
+  </nav><!--/nav-->
+
+</header><!--/header-->
+<section id="bigdata">
+  <div class="container">
+    <div class="center wow fadeInDown">
+
+		<div id="titlebigdata" style="text-align: center">
+	  <h1 style="  font-size: 36px;  color:#4e4e4e;">Big Data</h1></br>
+	  </div>
+			
+	  <div class="container">
+      <div class = "row">
+         
+          <div class ="col-md-12">
+      
+              <form id="selectWord" >
+				<p> Enter one word to display line chart </p>
+					<input id="word" name="word" type="text"/>
+					
+					
+					<input name="updateButton" 
+						   type="button" 
+						   value="Update Chart"  onclick="update()"/>
+				</form>
+				<aside></aside>
+				<!-- load the d3.js library -->    
+				<script src="http://d3js.org/d3.v3.min.js"></script>
+				<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+				<script>
+
+
+
+				// Set the dimensions of the canvas / graph
+				var margin = {top: 30, right: 20, bottom: 70, left: 50},
+					width = 960 - margin.left - margin.right,
+					height = 500 - margin.top - margin.bottom;
+
+				// Parse the key / time
+				var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+
+				// Set the ranges
+				var x = d3.time.scale().range([0, width]);
+				var y = d3.scale.linear().range([height, 0]);
+
+				// Define the axes
+				var xAxis = d3.svg.axis().scale(x)
+					.orient("bottom");
+
+				var yAxis = d3.svg.axis().scale(y)
+					.orient("left");
+
+				// Define the line
+				var valueline = d3.svg.line()
+					.x(function(d) { return x(d.key); })
+					.y(function(d) { return y(d.value); });
+					
+				// Adds the svg canvas
+				var svg = d3.select("aside")
+					.append("svg")
+						.attr("width", width + margin.left + margin.right)
+						.attr("height", height + margin.top + margin.bottom)
+					.append("g")
+						.attr("transform", 
+							  "translate(" + margin.left + "," + margin.top + ")");
+					
+				// Get the data
+
+						$.ajax({
+							url : 'http://localhost:5984/emailrepo/_design/repository/_view/byWCTime?group_level=2',
+							type : 'GET',
+							dataType : "jsonp",
+							'success': function (json) {
+								console.log("All word"+json);
+								alert("All part");
+								sdata=JSON.stringify(json);
+								//alert(sdata);
+								data = $.parseJSON(sdata);
+								console.log(data);
+								
+									//alert(JSON.stringify(data));
+					data.rows.forEach(function(d) {
+						d.key = parseDate(d.key[1]);
+						d.value = +d.value;
+					});
+
+					// Scale the range of the data
+					x.domain(d3.extent(data.rows, function(d) { return d.key; }));
+					y.domain([0, d3.max(data.rows, function(d) { return d.value; })]);
+
+					// Add the valueline path.
+					svg.append("path")
+						.attr("class", "line")
+						.attr("d", valueline(data.rows));
+
+					// Add the X Axis
+					svg.append("g")
+						.attr("class", "x axis")
+						.attr("transform", "translate(0," + height + ")")
+						.call(xAxis)
+						.selectAll("text")  
+						.style("text-anchor", "end")
+						.attr("dx", "-.8em")
+						.attr("dy", ".15em")
+						.attr("transform", function(d) {
+							return "rotate(-45)" 
+							});
+
+					// Add the Y Axis
+					svg.append("g")
+						.attr("class", "y axis")
+						.call(yAxis);
+
+
+							}
+						});
+						
+
+
+				// ** Update data section (Called from the onclick)
+				function update() {
+				var word=document.getElementById("word").value;
+					// Get the data again
+				 
+						$.ajax({
+							
+							url : 'http://localhost:5984/emailrepo/_design/repository/_view/byWCTime?group_level=2&startkey=[\"'+word+'\"]&endkey=[\"'+word+'\",{}]',
+							type : 'GET',
+							dataType : "jsonp",
+							'success': function (json) {
+								console.log("All word"+json);
+								alert("Search Word "+ word);
+								sdata=JSON.stringify(json);
+								//alert(sdata);
+								data = $.parseJSON(sdata);
+								console.log(data);
+								
+								
+								
+						data.rows.forEach(function(d) {
+							d.key = parseDate(d.key[1]);
+							d.value = +d.value;
+						});
+
+						// Scale the range of the data again 
+						x.domain(d3.extent(data.rows, function(d) { return d.key; }));
+						y.domain([0, d3.max(data.rows, function(d) { return d.value; })]);
+
+					// Select the section we want to apply our changes to
+					var svg = d3.select("aside").transition();
+
+					// Make the changes
+						svg.select(".line")   // change the line
+							.duration(750)
+							.attr("d", valueline(data.rows));
+						svg.select(".x.axis") // change the x axis
+							.duration(100)
+							.call(xAxis)
+							.selectAll("text")  
+								.style("text-anchor", "end")
+								.attr("dx", "-.8em")
+								.attr("dy", ".15em")
+								.attr("transform", function(d) {
+									return "rotate(-45)" 
+									});
+						svg.select(".y.axis") // change the y axis
+							.duration(100)
+							.call(yAxis);
+
+							}
+						});
+				  
+				}
+
+				</script>
+          </div>
+          
+      </div>
+	  </div>
+      <section>
+      <div  class="container">
+        </div>
+      </section>
+    
+  </div><!--/.container-->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header"></div>
+      <div class="modal-content">
+        <div class="modal-body" style="text-align: center">
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div>  <!-- /.modal -->
+</section>
+
+<section id="bottom">
+  <div class="container" >
+    <div class="row">
+      <div class="col-md-4">
+        <div class="widget">
+          <h3>Company</h3>
+          <ul>
+            <li><a href="#">Home</a></li>
+
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="widget">
+          <h3>Products</h3>
+          <ul>
+            <li><a href="mobile.html">Mobile</a></li>
+            <li><a href="bigdata.html">Big Data</a></li>
+          
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="widget">
+          <h3>About Us</h3>
+          <ul>
+                          
+                            <li><a href="locations.html">Location</a></li>
+                            <li><a href="pageunderconstruction.html">Contacts</a></li>
+                        </ul>
+        </div>
+      </div><!--/.col-md-3-->
+    </div>
+  </div>
+</section><!--/#bottom-->
+
+<footer id="footer" >
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12" align="center">
+        &copy; 2014 My Corp, Inc. All Rights Reserved.
+      </div>
+    </div>
+  </div>
+</footer><!--/#footer-->
+
+</body>
+</html>
