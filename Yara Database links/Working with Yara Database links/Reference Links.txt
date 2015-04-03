@@ -1,0 +1,6 @@
+Yara resources - http://www.deependresearch.org/2013/02/yara-resources.html
+
+Cuckoo open source malicious file scanner - http://docs.cuckoosandbox.org/en/latest/
+
+Working with yara Part 1 - http://www.securityflux.com/?p=98
+Working with yara Part 2 - http://www.securityflux.com/?p=121
