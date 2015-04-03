@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -40,23 +44,24 @@ public class readServlet extends HttpServlet {
 		String value="";
 		String line="";
 		int count=0;
+		
 		BufferedReader br=new BufferedReader(new FileReader("/home/adminuser/Downloads/emails_Karan.CSV"));
-		//for(int i=0;i<10;i++)
+		
 		br.readLine();
+		
 		while((line=br.readLine())!=null){
 			String[] data=line.split(",");
+			Pattern stopWords = Pattern.compile("\\b(?:i|a|and|about|an|are|that|it|you|your|if|for|on|are|with|as|he|was|is|from|the|to|u|of|this|will|in|our)\\b\\s*", Pattern.CASE_INSENSITIVE);
+			
 			r = (int) (Math.random() * (2 - 0)) + 0;
 			try{
-			//System.out.println("Subject "+data[0]+" From Name: "+data[1]+" From Address: "+data[2]+" To Name: "+data[4]+" To Address: "+data[5]);
-			value="{\"sub\": [{\"subject\": "+"\""+data[0]+"\""+"}],\"addresses\": [{\"from_name\": "+"\""+data[1]+"\""+",\"from_address\": "+"\""+data[2]+"\""+"},{\"to_name\": "+"\""+data[4]+"\""+",\"to_address\": "+"\""+data[5]+"\""+"}],\"time\": "+"\""+timeStamp[r]+"\""+"}";
-			//System.out.println(value);
-			System.out.println("--------------------");
+		
+				Matcher matcher = stopWords.matcher(data[0]);
+				String temp = matcher.replaceAll("");
+				
+			value="{\"subject\": "+"\""+temp+"\""+",\"addresses\": [{\"from_name\": "+"\""+data[1]+"\""+",\"from_address\": "+"\""+data[2]+"\""+"},{\"to_name\": "+"\""+data[4]+"\""+",\"to_address\": "+"\""+data[5]+"\""+"}],\"time\": "+"\""+timeStamp[r]+"\""+"}";
 			insertdb(value,cnt);
-			//break;
-			cnt++;
-			//break;
-			if(cnt==20)
-				break;
+			
 			}
 			catch(Exception e){
 				e.printStackTrace();
@@ -76,7 +81,7 @@ private static void insertdb(String value,int cnt) throws IOException{
 	System.out.println("URL "+url.toString());
 	OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
     //out.write("{\"sub\": [{\"subject\": \"karan's email\"}],\"addresses\": [{\"from_name\": \"spam filter\",\"from_address\": \"xyz@spam.com\"},{\"to_name\": \"test user\",\"to_address\": \"test@gmail.com\"}],\"time\": \"2010-03-08 14:59:30.252\"	}");
-	System.out.println("value "+value+" URL "+url);
+	//System.out.println("value "+value+" URL "+url);
 
 	out.write(value);
     out.close();
