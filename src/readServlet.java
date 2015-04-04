@@ -37,64 +37,38 @@ public class readServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		System.out.println("inside doGet of readServlet");
-		int cnt=100;
-		String[] timeStamp={"2015-02-08 14:59:30","2014-10-07 18:59:30","2014-12-12 15:59:30","2010-03-08 14:59:30"};
-		int r=0;
 		String value="";
 		String line="";
-		int count=0;
-		
-		BufferedReader br=new BufferedReader(new FileReader("/home/adminuser/Downloads/emails_Karan.CSV"));
-		
+		BufferedReader br=new BufferedReader(new FileReader("/home/adminuser/Downloads/uploads/clean csv/Cleaned Data with timestamp.csv"));
 		br.readLine();
-		
 		while((line=br.readLine())!=null){
 			String[] data=line.split(",");
 			Pattern stopWords = Pattern.compile("\\b(?:i|a|and|about|an|are|that|it|you|your|if|for|on|are|with|as|he|was|is|from|the|to|u|of|this|will|in|our)\\b\\s*", Pattern.CASE_INSENSITIVE);
-			
-			r = (int) (Math.random() * (2 - 0)) + 0;
 			try{
-
-		
 				Matcher matcher = stopWords.matcher(data[0]);
 				String temp = matcher.replaceAll("");
-				
-			value="{\"subject\": "+"\""+temp+"\""+",\"addresses\": [{\"from_name\": "+"\""+data[1]+"\""+",\"from_address\": "+"\""+data[2]+"\""+"},{\"to_name\": "+"\""+data[4]+"\""+",\"to_address\": "+"\""+data[5]+"\""+"}],\"time\": "+"\""+timeStamp[r]+"\""+"}";
-
-			//System.out.println("Subject "+data[0]+" From Name: "+data[1]+" From Address: "+data[2]+" To Name: "+data[4]+" To Address: "+data[5]);
-			
-			insertdb(value,cnt);
-			
+				value="{\"subject\": "+"\""+temp+"\""+",\"from_name\": "+"\""+data[1]+"\""+",\"from_address\": "+"\""+data[2]+"\""+",\"to_name\": "+"\""+data[3]+"\""+",\"to_address\": "+"\""+data[4]+"\""+",\"time\": "+"\""+data[5]+"\""+",\"ethernet_dest\": "+"\""+data[6]+"\""+",\"ethernet_source\": "+"\""+data[7]+"\""+",\"Source_IP\": "+"\""+data[8]+"\""+",\"Dest_IP\": "+"\""+data[9]+"\""+"}";
+				insertdb(value);
 			}
 			catch(Exception e){
 				e.printStackTrace();
 			}
 		}
-
-		
 		
 	}
-private static void insertdb(String value,int cnt) throws IOException{
-		
-
-		
-
-		URL url=new URL("http://127.0.0.1:5984/emailrepo/"+java.util.UUID.randomUUID());
-
+private static void insertdb(String value) throws IOException{
+				URL url=new URL("http://127.0.0.1:5984/emailrepo/"+java.util.UUID.randomUUID());
+				//System.out.println(url);
 	HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 	httpCon.setDoOutput(true);
 	httpCon.setRequestMethod("PUT");
 	System.out.println("URL "+url.toString());
 	OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
-    //out.write("{\"sub\": [{\"subject\": \"karan's email\"}],\"addresses\": [{\"from_name\": \"spam filter\",\"from_address\": \"xyz@spam.com\"},{\"to_name\": \"test user\",\"to_address\": \"test@gmail.com\"}],\"time\": \"2010-03-08 14:59:30.252\"	}");
-	//System.out.println("value "+value+" URL "+url);
-
-	out.write(value);
+   out.write(value);
     out.close();
     httpCon.getInputStream();
     /*try {
-        Thread.sleep(2000);                 //1000 milliseconds is one second.
+        Thread.sleep(100);                 //1000 milliseconds is one second.
     } catch(InterruptedException ex) {
         Thread.currentThread().interrupt();
     }*/
