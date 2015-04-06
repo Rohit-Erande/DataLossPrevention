@@ -39,7 +39,7 @@ public class readServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		String value="";
 		String line="";
-		BufferedReader br=new BufferedReader(new FileReader("/home/adminuser/Downloads/uploads/clean csv/Cleaned Data with timestamp.csv"));
+		BufferedReader br=new BufferedReader(new FileReader("/home/adminuser/Downloads/uploads/rohit_csv.csv"));
 		br.readLine();
 		while((line=br.readLine())!=null){
 			String[] data=line.split(",");
@@ -47,8 +47,9 @@ public class readServlet extends HttpServlet {
 			try{
 				Matcher matcher = stopWords.matcher(data[0]);
 				String temp = matcher.replaceAll("");
-				value="{\"subject\": "+"\""+temp+"\""+",\"from_name\": "+"\""+data[1]+"\""+",\"from_address\": "+"\""+data[2]+"\""+",\"to_name\": "+"\""+data[3]+"\""+",\"to_address\": "+"\""+data[4]+"\""+",\"time\": "+"\""+data[5]+"\""+",\"ethernet_dest\": "+"\""+data[6]+"\""+",\"ethernet_source\": "+"\""+data[7]+"\""+",\"Source_IP\": "+"\""+data[8]+"\""+",\"Dest_IP\": "+"\""+data[9]+"\""+"}";
+				value="{\"subject\": "+"\""+temp+"\""+",\"from_name\": "+"\""+data[1]+"\""+",\"from_address\": "+"\""+data[2]+"\""+",\"to_name\": "+"\""+data[3]+"\""+",\"to_address\": "+"\""+data[4]+"\""+",\"time\": "+"\""+data[5]+"\""+",\"ethernet_dest\": "+"\""+data[6]+"\""+",\"ethernet_source\": "+"\""+data[7]+"\""+",\"Source_IP\": "+"\""+data[8]+"\""+",\"Dest_IP\": "+"\""+data[9]+"\""+",\"Protocol\": "+"\""+data[10]+"\""+"}";
 				insertdb(value);
+				//System.out.println(value);
 			}
 			catch(Exception e){
 				e.printStackTrace();
