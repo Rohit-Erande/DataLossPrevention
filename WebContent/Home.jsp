@@ -16,12 +16,12 @@ Please select the email pcaps to upload
 	<input type="submit" value="upload email file"/>
 </form>
 
-<!--  <form action="Mobile.html" >
+<form action="WordCount.html" >
 	<input type="submit" value="Click to view Histogram of Words" />
 </form>
 <form action="LineChart.html" >
 	<input type="submit" value="Click to view Line chart with time" />
-</form> -->
+</form>
 
 </body>
 </html>
