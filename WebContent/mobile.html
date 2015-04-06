@@ -19,9 +19,6 @@
   shape-rendering: crispEdges;
 }
 
-.bar {
-  fill: orange;
-}
 
 .bar:hover {
   fill: orangered ;
@@ -82,7 +79,7 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Products <i class="fa fa-angle-down"></i></a>
                             <ul class="dropdown-menu">
                                 <li class="active"><a href="mobile.html">Mobile</a></li>
-                                <li><a href="bigdata.html">Big Data</a></li>
+                                <li><a href="bigdata.html">Line Chart</a></li>
                                
                             </ul>
                         </li>
@@ -105,7 +102,7 @@
     <div class="center wow fadeInDown">
 
 		<div id="titlebigdata" style="text-align: center">
-	  <h1 style="  font-size: 36px;  color:#4e4e4e;">Hostogram of Words</h1></br>
+	  <h1 style="  font-size: 36px;  color:#4e4e4e;">Histogram of Words</h1></br>
 	  </div>
 			
 	  <div class="container">
@@ -232,6 +229,9 @@
 					.attr("height", function(d) { return height - y(d.value); })
 					.on('mouseover', tip.show)
 					.on('mouseout', tip.hide)
+					.attr("fill", function(d) {
+						return "rgb("+(d.value)+", 200, 10)";
+					});
 
 				function type(d) {
 				  d.value = +d.value;
@@ -270,7 +270,7 @@
           <h3>Products</h3>
           <ul>
             <li><a href="mobile.html">Mobile</a></li>
-            <li><a href="bigdata.html">Big Data</a></li>
+            <li><a href="bigdata.html">Line Chart</a></li>
  
           </ul>
         </div>
