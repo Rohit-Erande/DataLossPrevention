@@ -1,0 +1,1519 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        #chart {
+            font-size: 10px;
+        }
+        
+        text {
+            pointer-events: none;
+        }
+        
+        .grandparent text {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        rect {
+            fill: none;
+            stroke: #fff;
+        }
+        
+        rect.parent,
+        .grandparent rect {
+            stroke-width: 2px;
+        }
+        
+        .grandparent rect {
+            fill: #fff;
+        }
+        
+        .children rect.parent,
+        .grandparent rect {
+            cursor: pointer;
+        }
+        
+        rect.parent {
+            pointer-events: all;
+        }
+        
+        .children:hover rect.child,
+        .grandparent:hover rect {
+            fill: #aaa;
+        }
+        
+        body {
+            font: 10px sans-serif;
+        }
+        
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+        
+        .bar {
+            fill: orange;
+        }
+        
+        .bar:hover {
+            fill: orangered;
+        }
+        
+        .x.axis path {
+            display: none;
+        }
+        
+        .d3-tip {
+            line-height: 1;
+            font-weight: bold;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            border-radius: 2px;
+        }
+        /* Creates a small triangle extender for the tooltip */
+        
+        .d3-tip:after {
+            box-sizing: border-box;
+            display: inline;
+            font-size: 10px;
+            width: 100%;
+            line-height: 1;
+            color: rgba(0, 0, 0, 0.8);
+            content: "\25BC";
+            position: absolute;
+            text-align: center;
+        }
+        /* Style northward tooltips differently */
+        
+        .d3-tip.n:after {
+            margin: -1px 0 0 0;
+            top: 100%;
+            left: 0;
+        }
+
+    </style>
+    <style type="text/css">
+        a {
+            font-family: verdana, arial, sans-serif;
+            font-size: 11px;
+            color: #333333;
+            font-size: 20px;
+        }
+        
+        .row {
+            height: 18px;
+            padding: 0px;
+            background: url(cell-grey.jpg);
+            margin: 0px;
+            padding: 8px;
+            border-top: 1px solid #fcfdec;
+            border-bottom: 0px;
+            border-left: 1px solid #fcfdec;
+            ;
+            border-right: 0px;
+        }
+        
+        .header {
+            padding: 0px;
+            background: url(cell-blue.jpg);
+            background: linear-gradient(to bottom, #d5e3e4 0%, #ccdee0 40%, #b3c8cc 100%);
+            padding: 8px;
+            border-top: 1px solid #eefafc;
+            border-bottom: 0px;
+            border-left: 1px solid #eefafc;
+            border-right: 0px;
+            height: 25px;
+            clear: left;
+            border: 1px solid white;
+        }
+        
+        .row {
+            clear: left;
+            background: lightgrey;
+            border: 1px solid white;
+            font-size: 12px;
+        }
+        
+        .header {
+            font-weight: bold;
+            color: #084B8A;
+            font-size: 15px;
+        }
+        
+        .cell {
+            float: left;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100px;
+            vertical-align: middle;
+        }
+        
+        .col-0 {
+            width: 80px
+        }
+        
+        .cal-4 {
+            width: 80px
+        }
+        
+        .col-1,
+        .col-2,
+        .col-3 {
+            width: 150px;
+        }
+        
+        .scroll {
+            width: 830px;
+            height: 400PX;
+            FLOAT: left;
+            overflow: scroll;
+            overflow-x: hidden;
+        }
+        
+        .scroll1 {
+            width: 690px;
+            height: 650PX;
+            FLOAT: right;
+            overflow: scroll;
+            overflow-x: hidden;
+        }
+        
+        fieldset {
+            font-family: sans-serif;
+            border: 2px solid #2e8a57;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        
+        fieldset legend {
+            background: #1F497D;
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 0 5px #ddd;
+            margin-left: 20px;
+        }
+
+    </style>
+    <script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
+    <script src="js/d3pie.min.js"></script>
+    <script src="js/divgrid.js"></script>
+
+
+</head>
+
+<body>
+    <fieldset>
+        <legend>Summary of top words based on count: Treemap</legend>
+        <table>
+
+
+            <tr>
+                <td>
+                    <div id="chart" style="padding:0px"></div>
+                </td>
+                <td width="100px">
+                    <input type="checkbox" name="cjk" id="cjk" value="ack">ack </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="ascii">ascii </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="technology">technology </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="absorb">absorb </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="system">system </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="organisation">organisation </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="test">test </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="google">google </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="prosessor">prosessor </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="digital">digital </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="education">education </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="logs">logs </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="documents">documents </input>
+                    </br>
+                    <input type="checkbox" name="cjk" id="cjk" value="cautious">cautious </input>
+                    </br>
+                    <input type="button" onclick="getCheckedCheckboxesFor();" value="Get Values" />
+                </td>
+
+            </tr>
+
+
+        </table>
+    </fieldset>
+    </br>
+    <table>
+        <tr>
+            <td style="width:68%">
+                <fieldset>
+                    <legend>Top words data: Table</legend>
+                    <div id="grid" class=scroll></div>
+                </fieldset>
+            </td>
+
+            <td width=300px>
+                <fieldset>
+                    <legend>Word count percentage: Donut Chart</legend>
+                    <div id="pieChart" style="float:right"></div>
+                </fieldset>
+            </td>
+        </tr>
+    </table>
+    </br>
+    <table>
+        <tr style="height:600px;">
+            <td style="width:600px;float:left;padding-left:0px">
+                <table>
+                    <tr>
+                        <td "width:300px;">
+                            <fieldset>
+                                <legend>Word count by year summary: Donut Chart</legend>
+                                <div id="pieChart1"></div>
+                            </fieldset>
+                        </td>
+                        <td "width:300px;">
+                            <fieldset>
+                                <legend>Word count by month summary: Donut Chart</legend>
+                                <div id="pieChart2"></div>
+                            </fieldset>
+                        </td>
+                    </tr>
+                </table>
+                <table>
+                    <tr>
+                        <td width="620px">
+                            <fieldset width="620px">
+                                <legend>Word count by date summary: Bar Chart</legend>
+                                <div id="barChart"></div>
+                            </fieldset>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td width="10px"></td>
+            <td style="width:670px;padding:0px">
+                <fieldset>
+                    <legend>Individual word data: Table</legend>
+                    <div id="gridWord" class=scroll1 style="float:right"></div>
+                </fieldset>
+            </td>
+        </tr>
+    </table>
+    </br>
+    <fieldset>
+        <legend>Word count by time: Scatter plot</legend>
+        <iframe src="scatterplot.html" width="99%" height="480px" style="padding:0px" frameBorder="0"></iframe>
+    </fieldset>
+    </br>
+
+    <iframe src="AttackCharts.html" width="100%" height="1000px" style="padding:0px" frameBorder="0"></iframe>
+
+    <script>
+        var arr = [];
+        var data;
+        var tmp = [];
+        var grid = d3.divgrid();
+        var gridWord = d3.divgrid();
+
+        var chartDataPie = [];
+
+        var wordDataDateSplit = [];
+
+        var margin = {
+                top: 20,
+                right: 0,
+                bottom: 0,
+                left: 0
+            },
+            width = 1200,
+            height = 450 - margin.top - margin.bottom,
+            formatNumber = d3.format(".2f"),
+            transitioning;
+
+        var x = d3.scale.linear()
+            .domain([0, width])
+            .range([0, width]);
+
+        var y = d3.scale.linear()
+            .domain([0, height])
+            .range([0, height]);
+
+        var treemap = d3.layout.treemap()
+            .children(function(d, depth) {
+                return depth ? null : d.children;
+            })
+            .sort(function(a, b) {
+                return a.value - b.value;
+            })
+            .ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
+            .round(false);
+
+        var svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.bottom + margin.top)
+            .style("margin-left", -margin.left + "px")
+            .style("margin.right", -margin.right + "px")
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .style("shape-rendering", "crispEdges");
+
+        var grandparent = svg.append("g")
+            .attr("class", "grandparent");
+
+
+
+        $.ajax({
+            url: 'http://localhost:5984/emailrepo/_design/repository/_view/byWCTime?group_level=6',
+            type: 'GET',
+            dataType: "jsonp",
+            success: function(source) {
+
+                source.rows.forEach(function(val) {
+
+                    tmp.push({
+                        date: val.key[0],
+                        sip: val.key[3],
+                        dip: val.key[4],
+                        name: val.key[5],
+                        value: val.value
+                    });
+
+                });
+
+                var groups = _(tmp)
+                    .groupBy('name');
+
+                var out = _(groups)
+                    .map(function(g, key) {
+                        return {
+
+                            name: key,
+                            value: _(g)
+                                .reduce(function(m, x) {
+                                    return m + x.value;
+                                }, 0)
+                        };
+                    });
+
+                var filter = [];
+                for (var i = 0; i < out.length; i++) {
+                    if (out[i].value > 70) {
+                        filter.push(out[i]);
+                    }
+                }
+                //console.log(JSON.stringify(filter));
+                data = {
+                    "name": "root",
+                    "children": filter
+                };
+
+
+
+
+                var table = [];
+
+                for (var i = 0; i < filter.length; i++) {
+                    var filter1 = tmp.filter(function(d) {
+                        return d.name == filter[i].name;
+                    });
+                    filter1.forEach(function(d) {
+                        table.push({
+                            name: d.name,
+                            date: d.date,
+                            SourceIP: d.sip,
+                            DestIP: d.dip,
+                            value: d.value
+                        });
+                    });
+                }
+
+
+                d3.select('#grid')
+                    .datum(table)
+                    .call(grid)
+                drawTreemap();
+
+                var out1 = _(groups)
+                    .map(function(g, key) {
+                        return {
+
+                            label: key,
+                            value: _(g)
+                                .reduce(function(m, x) {
+                                    return m + x.value;
+                                }, 0)
+                        };
+                    });
+
+                var filter2 = [];
+                for (var i = 0; i < out1.length; i++) {
+                    if (out1[i].value > 100) {
+                        filter2.push(out1[i]);
+                    }
+                }
+                pieChart(filter2);
+                init(); //pieChartUpdateYear(d.name);
+            }
+        });
+
+        function init() {
+
+            transitionBar("ack");
+            pieChartUpdateYear("ack");
+            pieChartUpdateMonth(2008, "ack");
+            barChartDay("January", 2008, "ack");
+
+        }
+
+
+        function getCheckedCheckboxesFor() {
+            //alert("checkbox filter");
+            checkboxName = 'cjk';
+            var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked');
+            if (arr.length < 1) {
+                Array.prototype.forEach.call(checkboxes, function(el) {
+                    arr.push(el.value);
+                });
+                //alert("array:\t" + arr);
+            } //return values;
+            else {
+                arr = [];
+                //alert("else array:\t" + arr);
+                Array.prototype.forEach.call(checkboxes, function(el) {
+                    arr.push(el.value);
+                });
+            }
+            //alert("array:\t"+arr);
+            document.getElementById("pieChart")
+                .innerHTML = "";
+            arrayData();
+
+        }
+
+        function arrayData() {
+
+            var groups = _(tmp)
+                .groupBy('name');
+
+            var out = _(groups)
+                .map(function(g, key) {
+                    return {
+
+                        name: key,
+                        value: _(g)
+                            .reduce(function(m, x) {
+                                return m + x.value;
+                            }, 0)
+                    };
+                });
+
+            var inputdata = {
+                "name": "root",
+                "children": out
+            };
+
+
+
+            var filtered = [];
+            for (var i = 0; i < arr.length; i++) {
+                var filter = inputdata.children.filter(function(d) {
+                    return d.name == arr[i];
+                });
+                filter.forEach(function(d) {
+                    filtered.push({
+                        name: d.name,
+                        value: d.value
+                    });
+                });
+
+            }
+            data = {
+                "name": "root",
+                "children": filtered
+            };
+
+
+            var table = [];
+            //   for (var i = 0; i < tmp.length; i++) {
+            for (var i = 0; i < arr.length; i++) {
+                var filter1 = tmp.filter(function(d) {
+                    return d.name == arr[i];
+                });
+                filter1.forEach(function(d) {
+                    table.push({
+
+                        name: d.name,
+                        date: d.date,
+                        SourceIP: d.sip,
+                        DestIP: d.dip,
+                        value: d.value
+                    });
+                });
+            }
+            //console.log(JSON.stringify(data));
+            d3.select('#grid')
+                .datum(table)
+                .call(grid)
+
+            drawTreemap();
+            //drawTable(filtered);
+
+
+            var dat1 = [];
+
+            for (var i = 0; i < arr.length; i++) {
+                var filter = out.filter(function(d) {
+                    return d.name == arr[i];
+                });
+                filter.forEach(function(d) {
+                    dat1.push({
+                        label: d.name,
+                        value: d.value
+                    });
+                });
+
+            }
+            pieChart(dat1);
+            d3.select('#gridWord')
+                .datum(table)
+                .call(gridWord)
+
+        }
+
+
+
+        function drawTreemap() {
+
+
+            initialize(data);
+            accumulate(data);
+            layout(data);
+            display(data);
+            //table(data);
+
+            function initialize(root) {
+                root.x = root.y = 0;
+                root.dx = width;
+                root.dy = height;
+                root.depth = 0;
+            }
+
+            function accumulate(d) {
+                return d.children ? d.value = d.children.reduce(function(p, v) {
+                    return p + accumulate(v);
+                }, 0) : d.value;
+            }
+
+
+            function layout(d) {
+                if (d.children) {
+                    treemap.nodes({
+                        children: d.children
+                    });
+                    d.children.forEach(function(c) {
+                        c.x = d.x + c.x * d.dx;
+                        c.y = d.y + c.y * d.dy;
+                        c.dx *= d.dx;
+                        c.dy *= d.dy;
+                        c.parent = d;
+                        layout(c);
+                    });
+                }
+            }
+
+            function display(d) {
+                grandparent
+                    .datum(d.parent)
+                    //.on("click", transition)
+                    //.select("text")
+                    //.text(name(d))
+
+
+                var g1 = svg.insert("g", ".grandparent")
+                    .datum(d)
+                    .attr("class", "depth");
+
+                var g = g1.selectAll("g")
+                    .data(d.children)
+                    .enter()
+                    .append("g")
+                    .on("click", function(d) {
+
+                        document.getElementById("pieChart1")
+                            .innerHTML = "";
+                        document.getElementById("pieChart2")
+                            .innerHTML = "";
+
+                        transitionBar(d.name);
+                        pieChartUpdateYear(d.name);
+                        pieChartUpdateMonth(2008, d.name);
+                        //barChartDay("January",2008,d.name);
+
+                    });
+
+
+                g.filter(function(d) {
+                        return d.children;
+                    })
+                    .classed("children", true)
+                    .on("click", transition);
+
+                g.selectAll(".child")
+                    .data(function(d) {
+                        return d.children || [d];
+                    })
+                    .enter()
+                    .append("rect")
+                    .attr("class", "child")
+                    .call(rect);
+
+
+
+                g.append("rect")
+                    .attr("class", "parent")
+                    .call(rect)
+                    .append("title")
+                    .text(function(d) {
+                        var percent = (d.value / 392.33);
+                        return "Word:\t \t" + d.name + "\nPercentage:\t" + formatNumber(percent) + "%\nCount:\t \t" + d.value;
+                    });
+
+                g.append("text")
+                    .attr("dy", ".75em")
+                    .text(function(d) {
+                        return d.name;
+                    })
+                    .call(text);
+
+                var color = d3.scale.category20c();
+                var colors = {};
+                g.filter(function(d) {
+                    var parent_depth = (d.parent)
+                        .depth;
+                    var current_node = d;
+                    if (parent_depth != 0) {
+                        current_node = d.parent;
+                    }
+                    if (!current_node.color) {
+                        current_node.color = color(current_node.name);
+                    }
+                    $(this)
+                        .find(".child")
+                        .css("fill", current_node.color);
+                });
+
+                function transition(d) {
+                    if (transitioning || !d) return;
+                    transitioning = true;
+
+                    var g2 = display(d),
+                        t1 = g1.transition()
+                        .duration(750),
+                        t2 = g2.transition()
+                        .duration(750);
+
+                    x.domain([d.x, d.x + d.dx]);
+                    y.domain([d.y, d.y + d.dy]);
+
+                    svg.style("shape-rendering", null);
+
+                    // Draw child nodes on top of parent nodes.
+                    svg.selectAll(".depth")
+                        .sort(function(a, b) {
+                            return a.depth - b.depth;
+                        });
+
+
+                    // Fade-in entering text.
+                    g2.selectAll("text")
+                        .style("fill-opacity", 0);
+
+                    // Transition to the new view.
+                    t1.selectAll("text")
+                        .call(text)
+                        .style("fill-opacity", 0);
+                    t2.selectAll("text")
+                        .call(text)
+                        .style("fill-opacity", 1);
+                    t1.selectAll("rect")
+                        .call(rect);
+                    t2.selectAll("rect")
+                        .call(rect);
+
+                    // Remove the old node when the transition is finished.
+                    t1.remove()
+                        .each("end", function() {
+                            svg.style("shape-rendering", "crispEdges");
+                            transitioning = false;
+                        });
+                }
+
+                return g;
+            }
+
+
+            function text(text) {
+                text.attr("x", function(d) {
+                        return x(d.x) + 6;
+                    })
+                    .attr("y", function(d) {
+                        return y(d.y) + 6;
+                    });
+            }
+
+            function rect(rect) {
+                rect.attr("x", function(d) {
+                        return x(d.x);
+                    })
+                    .attr("y", function(d) {
+                        return y(d.y);
+                    })
+                    .attr("width", function(d) {
+                        return x(d.x + d.dx) - x(d.x);
+                    })
+                    .attr("height", function(d) {
+                        return y(d.y + d.dy) - y(d.y);
+                    })
+                    .attr("id", function(d) {
+                        return d.name;
+                    });
+            }
+
+            function name(d) {
+                return d.parent ? name(d.parent) + "." + d.name : d.name;
+            }
+
+
+        }
+
+        function pieChart(jsonData) {
+            var data = {
+
+                "size": {
+                    "canvasHeight": 400,
+                    "canvasWidth": 450,
+                    "pieInnerRadius": "30%",
+                    "pieOuterRadius": "75%"
+                },
+                "data": {
+                    "sortOrder": "value-desc",
+                    "smallSegmentGrouping": {
+                        "enabled": true
+                    },
+
+                    "content": jsonData
+                },
+                "labels": {
+                    "outer": {
+                        "pieDistance": 10
+                    },
+                    "inner": {
+                        "hideWhenLessThanPercentage": 3
+                    },
+                    "mainLabel": {
+                        "fontSize": 11
+                    },
+                    "percentage": {
+                        "color": "#ffffff",
+                        "decimalPlaces": 5
+                    },
+                    "value": {
+                        "color": "#adadad",
+                        "fontSize": 11
+                    },
+                    "lines": {
+                        "enabled": true
+                    },
+                    "truncation": {
+                        "enabled": true
+                    }
+                },
+                "tooltips": {
+                    "enabled": true,
+                    "type": "placeholder",
+                    "string": "{label}: {value}, {percentage}%",
+                    "styles": {
+                        "fadeInSpeed": 13,
+                        "backgroundOpacity": 0.85
+                    }
+                },
+                "effects": {
+                    "pullOutSegmentOnClick": {
+                        "effect": "linear",
+                        "speed": 400,
+                        "size": 8
+                    }
+                },
+                "misc": {
+                    "gradient": {
+                        "enabled": true,
+                        "percentage": 100
+                    }
+                },
+                "callbacks": {
+                    onClickSegment: function(a) {
+
+                        //console.log(a.data.label);
+                        document.getElementById("pieChart1")
+                            .innerHTML = "";
+                        document.getElementById("pieChart2")
+                            .innerHTML = "";
+                        pieChartUpdateYear(a.data.label);
+                        transitionBar(a.data.label);
+
+                        pieChartUpdateMonth(2008, a.data.label);
+                        //barChartDay("January",2009,a.data.label);
+
+                    }
+                }
+
+            };
+            var pie = new d3pie("pieChart", data);
+        }
+
+        function pieChartUpdateYear(filterData) {
+
+            //alert("Filter word" + filterData);
+
+
+            var filter = tmp.filter(function(d) {
+                return d.name == filterData;
+            });
+
+            //console.log("filter"+ JSON.stringify(filter));
+            filter.forEach(function(d) {
+
+                var da = new Date(d.date),
+                    y = da.getFullYear(),
+                    //m=da.getMonth(),
+                    day = da.getDate(),
+                    h = da.getHours(),
+                    min = da.getMinutes(),
+                    s = da.getSeconds(),
+                    mi = da.getMilliseconds();
+                //n=m+1;
+                var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                    n = monthNames[da.getMonth()];
+
+                wordDataDateSplit.push({
+                    name: d.name,
+                    year: y,
+                    month: n,
+                    day: day,
+                    value: d.value
+                });
+            });
+            //console.log("wordDataDateSplit"+wordDataDateSplit);
+            //alert("array after filter and data splitting", wordDataDateSplit);
+
+            var groups = _(wordDataDateSplit)
+                .groupBy('year');
+
+            var wordDataYear = _(groups)
+                .map(function(g, key) {
+                    return {
+
+                        label: key,
+                        value: _(g)
+                            .reduce(function(m, x) {
+                                return m + x.value;
+                            }, 0)
+                    };
+                });
+            //alert("Data with year grouped"+wordDataYear.label);
+            /*var wordDataYear=[];
+				wordDataDateSplit.forEach(function(d){
+					wordDataYear.push({label:d.year, value:d.value});
+				}*/
+
+            var data = {
+
+                "size": {
+                    "canvasHeight": 280,
+                    "canvasWidth": 280,
+                    "pieInnerRadius": "30%",
+                    "pieOuterRadius": "70%"
+                },
+                "data": {
+
+                    "smallSegmentGrouping": {
+                        "enabled": true
+                    },
+
+                    "content": wordDataYear
+                },
+                "labels": {
+                    "outer": {
+                        "pieDistance": 5
+                    },
+                    "inner": {
+                        "hideWhenLessThanPercentage": 0
+                    },
+                    "mainLabel": {
+                        "fontSize": 11
+                    },
+                    "percentage": {
+                        "color": "#ffffff",
+                        "decimalPlaces": 2
+                    },
+
+                    "lines": {
+                        "enabled": true
+                    },
+                    "truncation": {
+                        "enabled": true
+                    }
+                },
+                "tooltips": {
+                    "enabled": true,
+                    "type": "placeholder",
+                    "string": "{label}, " + filterData + ": {value}" + ", {percentage}%",
+                    "styles": {
+                        "fadeInSpeed": 13,
+                        "backgroundOpacity": 0.85
+                    }
+                },
+                "effects": {
+                    "pullOutSegmentOnClick": {
+                        "effect": "linear",
+                        "speed": 400,
+                        "size": 8
+                    }
+                },
+                "misc": {
+                    "gradient": {
+                        "enabled": true,
+                        "percentage": 100
+                    }
+                },
+                "callbacks": {
+                    onClickSegment: function(a) {
+
+                        document.getElementById("pieChart2")
+                            .innerHTML = "";
+                        pieChartUpdateMonth(a.data.label, filterData);
+
+                    }
+                }
+
+            };
+            var pie = new d3pie("pieChart1", data);
+        }
+
+        function pieChartUpdateMonth(filterData, word) {
+
+
+            var wordSplit = [];
+
+            var filter = wordDataDateSplit.filter(function(d) {
+                return d.year == filterData;
+            });
+            //alert("Filter splitDAte"+JSON.stringify(filter));
+            //console.log("filter"+ JSON.stringify(filter));
+            filter.forEach(function(d) {
+
+                wordSplit.push({
+
+                    month: d.month,
+                    day: d.day,
+                    value: d.value
+                });
+            });
+
+            //alert("wordDataDateSplit filter"+JSON.stringify(wordDataDateSplit));
+
+
+            //console.log("wordDataDateSplit"+wordDataDateSplit);
+
+            var groups = _(wordSplit)
+                .groupBy('month');
+
+            var wordDataMonth = _(groups)
+                .map(function(g, key) {
+                    return {
+
+                        label: key,
+                        value: _(g)
+                            .reduce(function(m, x) {
+                                return m + x.value;
+                            }, 0)
+                    };
+                });
+            //alert("wordDataMonth wordDataDateSplit"+JSON.stringify(wordDataMonth));
+            //alert(wordDataYear.label);
+            var data = {
+
+                "size": {
+                    "canvasHeight": 280,
+                    "canvasWidth": 280,
+                    "pieInnerRadius": "30%",
+                    "pieOuterRadius": "70%"
+                },
+                "data": {
+                    "sortOrder": "value-desc",
+                    "smallSegmentGrouping": {
+                        "enabled": true
+                    },
+
+                    "content": wordDataMonth
+                },
+                "labels": {
+                    "outer": {
+                        "pieDistance": 5
+                    },
+                    "inner": {
+                        "hideWhenLessThanPercentage": 0
+                    },
+                    "mainLabel": {
+                        "fontSize": 11
+                    },
+                    "percentage": {
+                        "color": "#ffffff",
+                        "decimalPlaces": 2
+                    },
+                    "value": {
+                        "color": "#adadad",
+                        "fontSize": 11
+                    },
+
+                    "truncation": {
+                        "enabled": true
+                    }
+                },
+                "tooltips": {
+                    "enabled": true,
+                    "type": "placeholder",
+                    "string": filterData + "/{label} ," + word + ": {value}" + ", {percentage}%",
+                    "styles": {
+                        "fadeInSpeed": 13,
+                        "backgroundOpacity": 0.85
+                    }
+                },
+                "effects": {
+                    "pullOutSegmentOnClick": {
+                        "effect": "linear",
+                        "speed": 400,
+                        "size": 8
+                    }
+                },
+                "misc": {
+                    "gradient": {
+                        "enabled": true,
+                        "percentage": 100
+                    }
+                },
+                "callbacks": {
+                    onClickSegment: function(a) {
+                        //alert(a.data.label);
+                        document.getElementById("barChart")
+                            .innerHTML = "";
+                        barChartDay(a.data.label, filterData, word);
+
+                    }
+
+                }
+
+            };
+            var pie = new d3pie("pieChart2", data);
+        }
+
+
+
+
+        function barChartDay(monthValue, filterYear, word) {
+            //alert("Filter year" + monthValue);
+
+            var filter2 = wordDataDateSplit.filter(function(d) {
+                return d.year == filterYear;
+            });
+
+            var wordSplit = [];
+            var filter = filter2.filter(function(d) {
+                return d.month == monthValue;
+            });
+
+            //alert("filter"+ JSON.stringify(filter));
+
+            filter.forEach(function(d) {
+
+                wordSplit.push({
+                    month: d.month,
+                    day: d.day,
+                    value: d.value
+                });
+            });
+            //alert("wordDataDateSplit"+wordDataDateSplit);
+
+            var groups = _(wordSplit)
+                .groupBy('day');
+
+            var wordDataDay = _(groups)
+                .map(function(g, key) {
+                    return {
+
+                        label: key,
+                        value: _(g)
+                            .reduce(function(m, x) {
+                                return m + x.value;
+                            }, 0)
+                    };
+                });
+            //console.log("wordDataYear"+JSON.stringify(wordDataDay));
+
+
+            var margin = {
+                    top: 40,
+                    right: 20,
+                    bottom: 30,
+                    left: 40
+                },
+                width = 400 - margin.left - margin.right,
+                height = 300 - margin.top - margin.bottom;
+
+            var formatPercent = d3.format(".0%");
+
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                //.tickFormat(formatPercent);
+
+            var tip = d3.tip()
+                .attr('class', 'd3-tip')
+                .offset([-10, 0])
+                .html(function(d) {
+                    return "<strong>Date:</strong> <span style='color:red'>" + d.label + " " + monthValue + "," + filterYear + "</span> \n <strong>Word:</strong> <span style='color:red'>" + word + "</span> \n <strong>Count:</strong> <span style='color:red'>" + d.value + "</span>";
+                });
+
+            var svg = d3.select("#barChart")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.call(tip);
+
+            var data = wordDataDay;
+            //alert("data"+JSON.stringify(data));
+            x.domain(data.map(function(d) {
+                return d.label;
+            }));
+            y.domain([0, d3.max(data, function(d) {
+                return d.value;
+            })]);
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Count");
+
+            svg.selectAll(".bar")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", function(d) {
+                    return x(d.label);
+                })
+                .attr("width", x.rangeBand())
+                .attr("y", function(d) {
+                    return y(d.value);
+                })
+                .attr("height", function(d) {
+                    return height - y(d.value);
+                })
+                .on('mouseover', tip.show)
+                .on('mouseout', tip.hide);
+
+            svg.selectAll(".bar")
+                .data(data)
+                .exit()
+                .transition()
+                .duration(750)
+                .remove()
+
+
+            svg.attr("class", "bar")
+                .transition()
+                .duration(300)
+                .attr("class", "x axis")
+                .attr("class", "y axis")
+
+
+
+
+            function type(d) {
+                d.value = +d.value;
+                return d;
+            }
+
+
+        }
+
+
+        /************************************************************/
+        /********************** Bar chart****************************/
+        /************************************************************/
+        function transitionBar(name) {
+            //alert("On click transitionbar chart\t:" + name);
+
+            var filtered = [];
+            //   for (var i = 0; i < tmp.length; i++) {
+            var filter = tmp.filter(function(d) {
+                return d.name == name;
+            });
+            filter.forEach(function(d) {
+                filtered.push({
+
+                    name: d.name,
+                    date: d.date,
+                    SourceIP: d.sip,
+                    DestIP: d.dip,
+                    value: d.value
+                });
+            });
+            d3.select('#gridWord')
+                .datum(filtered)
+                .call(gridWord)
+
+        }
+
+    </script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script>
+        /****************************attack charts****************************/
+
+
+        var tmpAttack = [];
+
+        var gridAttack = d3.divgrid();
+
+        $.ajax({
+            url: 'http://localhost:5984/attackrepo/_design/repository/_view/byAttackType?group_level=6',
+            type: 'GET',
+            dataType: "jsonp",
+            success: function(source) {
+
+                source.rows.forEach(function(val) {
+                    //[doc.timestamp,doc.Source_IP, doc.Destination_IP,doc.Protocol,doc.Packet_no,doc.Attack]
+                    tmpAttack.push({
+                        date: val.key[0],
+                        sip: val.key[1],
+                        dip: val.key[2],
+                        protocol: val.key[3],
+                        packet_no: val.key[4],
+                        attack: val.key[5],
+                        value: 1
+                    });
+
+                });
+
+                var groups = _(tmpAttack)
+                    .groupBy('attack');
+
+                var outAttack = _(groups)
+                    .map(function(g, key) {
+                        return {
+
+                            attack: key,
+                            value: _(g)
+                                .reduce(function(m, x) {
+                                    return m + x.value;
+                                }, 0)
+                        };
+                    });
+
+                var filter = outAttack;
+
+
+                var table = [];
+
+                for (var i = 0; i < filter.length; i++) {
+                    var filter1 = tmpAttack.filter(function(d) {
+                        return d.attack == filter[i].attack;
+                    });
+                    filter1.forEach(function(d) {
+                        table.push({
+                            date: d.date,
+                            Source_IP: d.sip,
+                            Dest_IP: d.dip,
+                            protocol: d.protocol,
+                            packet_no: d.packet_no,
+                            attack: d.attack
+                        });
+                    });
+                }
+
+
+                d3.select('#gridAttack')
+                    .datum(table)
+                    .call(gridAttack)
+
+                var outAttack1 = _(groups)
+                    .map(function(g, key) {
+                        return {
+
+                            label: key,
+                            value: _(g)
+                                .reduce(function(m, x) {
+                                    return m + x.value;
+                                }, 0)
+                        };
+                    });
+
+
+                pieChartAttack(outAttack1);
+
+            }
+        });
+
+
+
+        function pieChartAttack(jsonData) {
+            var data = {
+
+                "size": {
+                    "canvasHeight": 400,
+                    "canvasWidth": 400,
+                    "pieInnerRadius": "30%",
+                    "pieOuterRadius": "75%"
+                },
+                "data": {
+                    "sortOrder": "value-desc",
+                    "smallSegmentGrouping": {
+                        "enabled": true
+                    },
+
+                    "content": jsonData
+                },
+                "labels": {
+                    "outer": {
+                        "pieDistance": 10
+                    },
+                    "inner": {
+                        "hideWhenLessThanPercentage": 3
+                    },
+                    "mainLabel": {
+                        "fontSize": 11
+                    },
+                    "percentage": {
+                        "color": "#ffffff",
+                        "decimalPlaces": 5
+                    },
+                    "value": {
+                        "color": "#adadad",
+                        "fontSize": 11
+                    },
+                    "lines": {
+                        "enabled": true
+                    },
+                    "truncation": {
+                        "enabled": true
+                    }
+                },
+                "tooltips": {
+                    "enabled": true,
+                    "type": "placeholder",
+                    "string": "{label}: {value}, {percentage}%",
+                    "styles": {
+                        "fadeInSpeed": 13,
+                        "backgroundOpacity": 0.85
+                    }
+                },
+                "effects": {
+                    "pullOutSegmentOnClick": {
+                        "effect": "linear",
+                        "speed": 400,
+                        "size": 8
+                    }
+                },
+                "misc": {
+                    "gradient": {
+                        "enabled": true,
+                        "percentage": 100
+                    }
+                },
+                "callbacks": {
+                    onClickSegment: function(a) {
+
+                        transitionTableAttack(a.data.label);
+
+                    }
+                }
+
+            };
+            var pie = new d3pie("attackChart", data);
+        }
+
+
+
+
+        function transitionTableAttack(attack) {
+            alert("On click transitionTableAttack chart\t:" + attack);
+
+            var filtered = [];
+            var filter = tmpAttack.filter(function(d) {
+                return d.attack == attack;
+            });
+            filter.forEach(function(d) {
+                filtered.push({
+
+                    date: d.date,
+                    Source_IP: d.sip,
+                    Dest_IP: d.dip,
+                    protocol: d.protocol,
+                    packet_no: d.packet_no,
+                    attack: d.attack
+                });
+            });
+            d3.select('#gridAttack')
+                .datum(filtered)
+                .call(gridAttack)
+
+        }
+
+    </script>
+    <script src="js/divgrid.js"></script>
+</body>
+
+</html>

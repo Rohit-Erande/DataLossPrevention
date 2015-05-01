@@ -1,0 +1,649 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+   
+<html>
+  <head>
+    <style>
+      .axis {
+        font-size: 10px;
+      }
+      .axis path {
+        fill: none;
+        stroke: #000000;
+      }
+      .axis .tick line {
+        stroke: #000;
+      }
+      .states {
+            fill: #ccc;
+            stroke: #fff;
+      }
+	
+.tooltip {
+  position: absolute;
+  text-align: center; 
+  pointer-events: none;
+  background-color: #c6dbef	;
+  border: solid 1px #aaa;
+  border-radius: 8px;
+                
+  padding: 2px;             
+  font: 12px sans-serif; 
+  font-weight: bold;	
+}
+
+
+    </style>
+	 <style>
+        #chart {
+            font-size: 10px;
+        }
+        
+        text {
+            pointer-events: none;
+        }
+        
+        .grandparent text {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        rect {
+            fill: none;
+            stroke: #fff;
+        }
+        
+        rect.parent,
+        .grandparent rect {
+            stroke-width: 2px;
+        }
+        
+        .grandparent rect {
+            fill: #fff;
+        }
+        
+        .children rect.parent,
+        .grandparent rect {
+            cursor: pointer;
+        }
+        
+        rect.parent {
+            pointer-events: all;
+        }
+        
+        .children:hover rect.child,
+        .grandparent:hover rect {
+            fill: #aaa;
+        }
+        
+        body {
+            font: 10px sans-serif;
+        }
+        
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+        
+        .bar {
+            fill: orange;
+        }
+        
+        .bar:hover {
+            fill: orangered;
+        }
+        
+        .x.axis path {
+            display: none;
+        }
+        
+        .d3-tip {
+            line-height: 1;
+            font-weight: bold;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            border-radius: 2px;
+        }
+        /* Creates a small triangle extender for the tooltip */
+        
+        .d3-tip:after {
+            box-sizing: border-box;
+            display: inline;
+            font-size: 10px;
+            width: 100%;
+            line-height: 1;
+            color: rgba(0, 0, 0, 0.8);
+            content: "\25BC";
+            position: absolute;
+            text-align: center;
+        }
+        /* Style northward tooltips differently */
+        
+        .d3-tip.n:after {
+            margin: -1px 0 0 0;
+            top: 100%;
+            left: 0;
+        }
+
+    </style>
+    <style type="text/css">
+        a {
+            font-family: verdana, arial, sans-serif;
+            font-size: 11px;
+            color: #333333;
+            font-size: 20px;
+        }
+        
+        .row {
+            height: 18px;
+            padding: 0px;
+            background: url(cell-grey.jpg);
+            margin: 0px;
+            padding: 8px;
+            border-top: 1px solid #fcfdec;
+            border-bottom: 0px;
+            border-left: 1px solid #fcfdec;
+            ;
+            border-right: 0px;
+        }
+        
+        .header {
+            padding: 0px;
+            background: url(cell-blue.jpg);
+            background: linear-gradient(to bottom, #d5e3e4 0%, #ccdee0 40%, #b3c8cc 100%);
+            padding: 8px;
+            border-top: 1px solid #eefafc;
+            border-bottom: 0px;
+            border-left: 1px solid #eefafc;
+            border-right: 0px;
+            height: 25px;
+            clear: left;
+            border: 1px solid white;
+        }
+        
+        .row {
+            clear: left;
+            background: lightgrey;
+            border: 1px solid white;
+            font-size: 12px;
+        }
+        
+        .header {
+            font-weight: bold;
+            color: #084B8A;
+            font-size: 15px;
+        }
+        
+        .cell {
+            float: left;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100px;
+            vertical-align: middle;
+        }
+        
+        .col-0{
+            width: 150px
+        }
+        
+		.col-1,
+        .col-2{
+            width: 120px
+        }
+		
+		.cal-5 {
+            width: 250px
+        }
+        
+        
+        .col-3, .cal-4 {
+            width: 80px
+        }
+        
+
+        .scroll1 {
+            width: 730px;
+            height: 450PX;
+            overflow: scroll;
+            overflow-x: hidden;
+        }
+       fieldset {
+		    font-family: sans-serif;
+		    
+		    border: 2px solid #2e8a57;
+		    border-radius: 5px;
+		    padding: 5px;
+		}
+		
+		fieldset legend {
+		    background: #B40431;
+		    color: #fff;
+		    padding: 5px 10px ;
+		    font-size: 15px;
+		    border-radius: 5px;
+		    box-shadow: 0 0 0 5px #ddd;
+		    margin-left: 20px;
+		}       
+
+    </style>
+   <script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
+    <script src="js/d3pie.min.js"></script>
+
+	<link rel="stylesheet" href="//rawgithub.com/Caged/d3-tip/master/examples/example-styles.css">
+  </head>
+  <body>
+  
+	 		<table style="padding:0px"><tr>
+            <td style="padding:0px"><fieldset>
+			<legend>Attack by count: Donut Chart</legend>
+                <div id="pieChartAttack" ></div>
+				</fieldset>
+            </td>
+			<td style=" width:750px;padding-right:0px">
+			<fieldset>
+			<legend>Attacks summary: Table</legend>
+                 <div id="gridAttack" class=scroll1 ></div>
+            </fieldset>
+			</td>
+			</tr></table>
+			</br>
+			 <fieldset>
+			<legend>Attacks count by time: Scatter plot</legend>
+	 <table style="padding:0px">
+	 
+	 <tr>
+	 <td style="padding:0px">
+	
+	 	<div id="scatterAttack" style="padding:0px"></div>
+		
+		</td>
+	 <td>
+
+<input type="checkbox" name="cjk" id="cjk" value="Linux.Shelock">Linux.Shelock </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Trojan.Mdropper!gen3">Trojan.Mdropper!gen3 </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Armadilo">Armadilo </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Backdoor.Bezigate">Backdoor.Bezigate </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Backdoor.Weecnaw">Backdoor.Weecnaw </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Trojan.Bisonal">Trojan.Bisonal </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Trojan.Explod">Trojan.Explod </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Trojan.Pengdoloder">Trojan.Pengdoloder </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Trojan.Wifaper">Trojan.Wifaper </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="W97M.Downloader.B">W97M.Downloader.B </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Backdoor.Dino">Backdoor.Dino </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Trojan.Inflabot">Trojan.Inflabot </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="Trojan.Navedri">Trojan.Navedri </input></br>
+
+<input type="button" id="submit"  value="Submit" />
+</td></table></fieldset>
+<br><br>
+
+	
+	
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script src="js/scatterAttacks.js"></script>
+
+    <script src="js/brushAttacks.js"></script>
+	<script src="js/d3_tip.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+	    <script src="js/divgrid.js"></script>
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>
+        
+        var Vis = {};
+		var arr=[];
+        Vis.data = new Array();
+		
+        var tmpAttack = [];
+        
+		var gridAttack = d3.divgrid();
+        /**      http://bl.ocks.org/dukevis/6768900      */
+		
+        var width = 960,
+        height = 410;
+        var data;
+		
+
+        //var json_file = "pics5.json";
+
+        var svg = d3.select("#scatterAttack").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+        
+        var mapgroup = svg.append("g");
+        
+		
+		
+		
+		
+        $.ajax({
+        url: 'http://localhost:5984/attackrepo/_design/repository/_view/byTimeAttack?group_level=2',
+        type:'GET',
+		dataType:"jsonp",
+		success: function(source) {
+			var file_data = [];
+			
+				source.rows.forEach(function(val) {
+				var date = ((new Date(val.key[0])).getTime());
+						if(val.value>3){console.log(val.key[1]);}
+						
+						  file_data.push({id: val.key[1], score:val.value,created:date });    
+						  
+			  });
+							
+			//console.log(JSON.stringify(file_data));
+                  Vis.data = file_data;
+                  
+                  createDiagram();
+          
+		  }
+		  });
+      
+	  
+	    
+      function createDiagram() {
+			
+		// console.log(JSON.stringify(Vis.data));
+		 
+          var sgroup = svg.append("g")
+          .attr("transform", "translate(55, 0)")
+          var scatter = d3.chart.scatter()
+          scatter.data(Vis.data)
+				 .width(800)
+          scatter(sgroup)
+		  
+		 
+		  
+          //brush
+          var bgroup = svg.append("g")
+          .attr("transform", "translate(55, 370)")
+          var brush = d3.chart.brush()
+          brush
+          .data(Vis.data)
+          .width(700)
+          brush(bgroup)
+          
+          brush.on("filter", function(filtered) {
+                   scatter.data(filtered);
+				  // alert(JSON.stringify(filtered));
+                   scatter.update();
+				})
+				
+				
+		 
+          scatter.on("hover", function(hovered) {
+							 
+                              brush.highlight(hovered)
+                              })
+				
+	/**** word filter*********/
+				  
+		  d3.selectAll("#submit").on("click", function() {
+		  var checkboxName = "cjk";
+			var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked');
+						Array.prototype.forEach.call(checkboxes, function(el) {
+							arr.push(el.value);
+						});
+						//return values;
+
+					//alert("array:\t"+arr);	
+					var filtered=[];
+                for (var i = 0; i < arr.length; i++) {
+                    var filter = Vis.data.filter(function(d) {
+                        return d.id == arr[i];
+                    });
+                    filter.forEach(function(d) {
+                        filtered.push({id: d.id, score: d.score,created:d.created });
+                    });
+
+                }
+				
+				//console.log(JSON.stringify(data));
+				
+				 scatter.data(filtered);
+				  // alert(JSON.stringify(filtered));
+                  scatter.update();
+			});  
+			
+			
+			
+			
+
+		 
+      }
+  
+  
+/****************************attack charts****************************/
+	
+	$.ajax({
+            url: 'http://localhost:5984/attackrepo/_design/repository/_view/byAttackType?group_level=6',
+            type: 'GET',
+            dataType: "jsonp",
+            success: function(source) {
+
+                source.rows.forEach(function(val) {
+				//[doc.timestamp,doc.Source_IP, doc.Destination_IP,doc.Protocol,doc.Packet_no,doc.Attack]
+                    tmpAttack.push({
+                        date: val.key[0],
+                        sip: val.key[1],
+                        dip: val.key[2],
+                        protocol: val.key[3],
+                        packet_no: val.key[4],
+						attack:val.key[5],
+						value:val.value
+                    });
+
+                });
+
+                var groups = _(tmpAttack)
+                    .groupBy('attack');
+
+                var outAttack = _(groups)
+                    .map(function(g, key) {
+                        return {
+
+                            attack: key,
+                            value: _(g)
+                                .reduce(function(m, x) {
+                                    return m + x.value;
+                                }, 0)
+                        };
+                    });
+
+                var filter =outAttack;
+   
+				
+                var table = [];
+
+                for (var i = 0; i < filter.length; i++) {
+                    var filter1 = tmpAttack.filter(function(d) {
+                        return d.attack == filter[i].attack;
+                    });
+                    filter1.forEach(function(d) {
+                        table.push({
+							date: d.date,
+							Source_IP: d.sip,
+							Dest_IP: d.dip,
+							protocol: d.protocol,
+							packet_no: d.packet_no,
+							attack:d.attack
+                        });
+                    });
+                }
+
+
+                d3.select('#gridAttack')
+                    .datum(table)
+                    .call(gridAttack)
+               
+                var outAttack1 = _(groups)
+                    .map(function(g, key) {
+                        return {
+
+                            label: key,
+                            value: _(g)
+                                .reduce(function(m, x) {
+                                    return m + x.value;
+                                }, 0)
+                        };
+                    });
+
+                
+                pieChartAttack(outAttack1);
+			
+            }
+        });
+		
+		
+		
+		function pieChartAttack(jsonData) {
+            var data = {
+
+                "size": {
+                    "canvasHeight": 450,
+                    "canvasWidth": 530,
+                    "pieInnerRadius": "30%",
+                    "pieOuterRadius": "60%"
+                },
+                "data": {
+                    
+                    "smallSegmentGrouping": {
+                        "enabled": true
+                    },
+
+                    "content": jsonData
+                },
+                "labels": {
+                    "outer": {
+                        "pieDistance": 5
+                    },
+                    "inner": {
+                        "hideWhenLessThanPercentage": 1
+                    },
+                    "mainLabel": {
+                        "fontSize": 11
+                    },
+                    "percentage": {
+                        "color": "#ffffff",
+                        "decimalPlaces": 2
+                    },
+                    "value": {
+                        "color": "#adadad",
+                        "fontSize": 11
+                    },
+                    "lines": {
+                        "enabled": true
+                    },
+                    "truncation": {
+                        "enabled": true
+                    }
+                },
+                "tooltips": {
+                    "enabled": true,
+                    "type": "placeholder",
+                    "string": "{label}: {value}, {percentage}%",
+                    "styles": {
+                        "fadeInSpeed": 13,
+                        "backgroundOpacity": 0.85
+                    }
+                },
+                "effects": {
+                    "pullOutSegmentOnClick": {
+                        "effect": "linear",
+                        "speed": 400,
+                        "size": 8
+                    }
+                },
+                "misc": {
+                    "gradient": {
+                        "enabled": true,
+                        "percentage": 100
+                    }
+                },
+                "callbacks": {
+					onClickSegment: function(a) {
+					//alert(a.data.value);
+					transitionTableAttack(a.data.label,jsonData);
+					
+				}
+				}
+
+            };
+            var pie = new d3pie("pieChartAttack", data);
+        }
+		
+		
+		
+		
+		function transitionTableAttack(attack,data) {
+            //alert("On click transitionTableAttack chart\t:" + attack);
+			     var filtered = [];
+			if(attack === "Other"){
+			var filterOthers = [];
+            var filterOth = data.filter(function(d) {
+				if(d.value < 4){
+                filterOthers.push(d.label);
+				}
+				
+            });
+			
+			
+	
+       
+			for (var i = 0; i < filterOthers.length; i++) {
+            var filter = tmpAttack.filter(function(d) {
+                return d.attack == filterOthers[i];
+            });
+            filter.forEach(function(d) {
+                filtered.push({
+
+                  date: d.date,
+							Source_IP: d.sip,
+							Dest_IP: d.dip,
+							protocol: d.protocol,
+							packet_no: d.packet_no,
+							attack:d.attack
+                });
+            });
+			}
+			//alert("On click transitionTableAttack chart\t:" + filterOthers + "\n" + "attackData" + filter);
+			}
+			else{
+			
+            var filter = tmpAttack.filter(function(d) {
+                return d.attack == attack;
+            });
+            filter.forEach(function(d) {
+                filtered.push({
+
+                  date: d.date,
+							Source_IP: d.sip,
+							Dest_IP: d.dip,
+							protocol: d.protocol,
+							packet_no: d.packet_no,
+							attack:d.attack
+                });
+            });
+			}
+            d3.select('#gridAttack')
+                .datum(filtered)
+                .call(gridAttack)
+
+        }
+		
+		
+	
+	</script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+  </body>
+</html>

@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+   <title>
+      D3 Scatter plot
+    </title>
+<html>
+  <head>
+    <style>
+      .axis {
+        font-size: 10px;
+      }
+      .axis path {
+        fill: none;
+        stroke: #000000;
+      }
+      .axis .tick line {
+        stroke: #000;
+      }
+      .states {
+            fill: #ccc;
+            stroke: #fff;
+      }
+	
+.tooltip {
+  position: absolute;
+  text-align: center; 
+  pointer-events: none;
+  background-color: #c6dbef	;
+  border: solid 1px #aaa;
+  border-radius: 8px;
+                
+  padding: 2px;             
+  font: 12px sans-serif; 
+  font-weight: bold;	
+}
+
+
+    </style>
+	<link rel="stylesheet" href="//rawgithub.com/Caged/d3-tip/master/examples/example-styles.css">
+  </head>
+  <body>
+	 <table height="410px">
+	 
+	 <tr>
+	 <td>
+	 	<div style="padding:0px"></div>
+		</td>
+	 <td>
+
+<input type="checkbox" name="cjk" id="cjk" value="ack">ack </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="ascii">ascii </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="technology">technology </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="absorb">absorb </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="system">system </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="organisation">organisation </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="test">test </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="google">google </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="prosessor">prosessor </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="digital">digital </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="education">education </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="logs">logs </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="documents">documents </input></br>
+    <input type="checkbox" name="cjk" id="cjk" value="cautious">cautious </input></br>	
+<input type="button" id="submit"  value="Submit" />
+</td></table>
+<br><br>
+
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script src="js/scatter.js"></script>
+	
+    <script src="js/brush.js"></script>
+	<script src="js/d3_tip.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>
+        
+        var Vis = {};
+		var arr=[];
+        Vis.data = new Array();
+
+        /**      http://bl.ocks.org/dukevis/6768900      */
+		
+        var width = 960,
+        height = 410;
+        var data;
+		
+
+        //var json_file = "pics5.json";
+
+        var svg = d3.select("div").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+        
+        var mapgroup = svg.append("g");
+        
+		
+		
+		
+		
+        $.ajax({
+        url: 'http://localhost:5984/emailrepo/_design/repository/_view/byWCTime?group_level=6',
+        type:'GET',
+		dataType:"jsonp",
+		success: function(source) {
+			var file_data = [];
+			
+				source.rows.forEach(function(val) {
+				var date = ((new Date(val.key[0])).getTime()/1000);
+						if(val.value > 3){
+
+						  file_data.push({id: val.key[5], score: val.value,created:date });    
+						  }
+			  });
+							
+			console.log(JSON.stringify(file_data));
+                  Vis.data = file_data;
+                  
+                  Vis.data.forEach(function(d) {
+                               d.created *= 1000;
+                  });
+                  createDiagram();
+          
+		  }
+		  });
+      
+	  
+	    
+      function createDiagram() {
+			
+		// console.log(JSON.stringify(Vis.data));
+		 
+          var sgroup = svg.append("g")
+          .attr("transform", "translate(55, 0)")
+          var scatter = d3.chart.scatter()
+          scatter.data(Vis.data)
+				 .width(800)
+          scatter(sgroup)
+		  
+		 
+		  
+          //brush
+          var bgroup = svg.append("g")
+          .attr("transform", "translate(55, 370)")
+          var brush = d3.chart.brush()
+          brush
+          .data(Vis.data)
+          .width(800)
+          brush(bgroup)
+          
+          brush.on("filter", function(filtered) {
+                   scatter.data(filtered);
+				  // alert(JSON.stringify(filtered));
+                   scatter.update();
+				})
+				
+				
+		 
+          scatter.on("hover", function(hovered) {
+							 
+                              brush.highlight(hovered)
+                              })
+				
+	/**** word filter*********/
+				  
+		  d3.selectAll("#submit").on("click", function() {
+		  var checkboxName = "cjk";
+			var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked');
+						Array.prototype.forEach.call(checkboxes, function(el) {
+							arr.push(el.value);
+						});
+						//return values;
+
+					alert("array:\t"+arr);	
+					var filtered=[];
+                for (var i = 0; i < arr.length; i++) {
+                    var filter = Vis.data.filter(function(d) {
+                        return d.id == arr[i];
+                    });
+                    filter.forEach(function(d) {
+                        filtered.push({id: d.id, score: d.score,created:d.created });
+                    });
+
+                }
+				
+				//console.log(JSON.stringify(data));
+				
+				 scatter.data(filtered);
+				  // alert(JSON.stringify(filtered));
+                  scatter.update();
+			});  
+		 
+      }
+  
+  
+  
+    </script>
+
+  </body>
+</html>

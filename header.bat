@@ -1,0 +1,1 @@
+"C:\Program Files\Wireshark\tshark" -c %1 -r "C:\Users\Poojitha\Downloads\web.pcap" | tail -1
